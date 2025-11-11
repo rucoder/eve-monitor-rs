@@ -40,8 +40,8 @@ pub struct ResultData {
     pub version: u8,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
-#[serde(rename_all = "PascalCase")]
+#[derive(Debug, Deserialize, Serialize, Default)]
+#[serde(rename_all = "PascalCase", default)]
 pub struct Port {
     alias: String,
     cost: u32,
@@ -65,8 +65,8 @@ pub struct Port {
     wireless_cfg: WirelessCfg,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
-#[serde(rename_all = "PascalCase")]
+#[derive(Debug, Deserialize, Serialize, Default)]
+#[serde(rename_all = "PascalCase", default)]
 pub struct Bond {
     #[serde(rename = "ARPMonitor")]
     pub arp_monitor: ArpMonitor,
@@ -77,16 +77,16 @@ pub struct Bond {
     pub mode: BondMode,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
-#[serde(rename_all = "PascalCase")]
+#[derive(Debug, Deserialize, Serialize, Default)]
+#[serde(rename_all = "PascalCase", default)]
 pub struct ArpMonitor {
     pub enabled: bool,
     pub ip_targets: Option<String>,
     pub interval: u32,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
-#[serde(rename_all = "PascalCase")]
+#[derive(Debug, Deserialize, Serialize, Default)]
+#[serde(rename_all = "PascalCase", default)]
 pub struct MIIMonitor {
     pub enabled: bool,
     pub interval: u32,
@@ -94,15 +94,15 @@ pub struct MIIMonitor {
     pub down_delay: u32,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
-#[serde(rename_all = "PascalCase")]
+#[derive(Debug, Deserialize, Serialize, Default)]
+#[serde(rename_all = "PascalCase", default)]
 pub struct Vlan {
     pub id: u32,
     pub parent_port: String,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
-#[serde(rename_all = "PascalCase")]
+#[derive(Debug, Deserialize, Serialize, Default)]
+#[serde(rename_all = "PascalCase", default)]
 pub struct WirelessCfg {
     pub cellular: Option<String>,
     #[serde(rename = "CellularV2")]
@@ -111,23 +111,23 @@ pub struct WirelessCfg {
     pub wifi: Option<String>,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
-#[serde(rename_all = "PascalCase")]
+#[derive(Debug, Deserialize, Serialize, Default)]
+#[serde(rename_all = "PascalCase", default)]
 pub struct CellularV2 {
     pub access_points: Option<String>,
     pub location_tracking: bool,
     pub probe: Probe,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
-#[serde(rename_all = "PascalCase")]
+#[derive(Debug, Deserialize, Serialize, Default)]
+#[serde(rename_all = "PascalCase", default)]
 pub struct Probe {
     pub address: String,
     pub disable: bool,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
-#[serde(rename_all = "PascalCase")]
+#[derive(Debug, Deserialize, Serialize, Default)]
+#[serde(rename_all = "PascalCase", default)]
 pub struct DeviceNetworkStatus {
     #[serde(rename = "DPCKey")]
     pub dpc_key: String,
@@ -139,8 +139,8 @@ pub struct DeviceNetworkStatus {
     pub ports: Option<Vec<NetworkPortStatus>>,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
-#[serde(rename_all = "PascalCase")]
+#[derive(Debug, Deserialize, Serialize, Default)]
+#[serde(rename_all = "PascalCase", default)]
 pub struct RadioSilence {
     pub imposed: bool,
     pub change_in_progress: bool,
@@ -300,8 +300,8 @@ pub struct NetworkPortStatus {
 /// 2. If network_proxy_enable is false, then one of the proxies from the proxies list is used
 /// 3. Only one entry per proxy type  is possible in the proxies list
 /// 4. If [ProxyConfig::pacfile] is used then proxy configuration is taken from the .pac file
-#[derive(Debug, Deserialize, Serialize, PartialEq, Clone)]
-#[serde(rename_all = "PascalCase")]
+#[derive(Debug, Deserialize, Serialize, PartialEq, Clone, Default)]
+#[serde(rename_all = "PascalCase", default)]
 pub struct ProxyConfig {
     pub proxies: Option<Vec<ProxyEntry>>,
     pub exceptions: String,
@@ -315,8 +315,8 @@ pub struct ProxyConfig {
     pub proxy_cert_pem: Option<Vec<Vec<u8>>>,
 }
 
-#[derive(Debug, Deserialize, Serialize, PartialEq, Clone)]
-#[serde(rename_all = "PascalCase")]
+#[derive(Debug, Deserialize, Serialize, PartialEq, Clone, Default)]
+#[serde(rename_all = "PascalCase", default)]
 pub struct L2LinkConfig {
     l2_type: L2LinkType,
     #[serde(rename = "VLAN")]
@@ -357,7 +357,8 @@ pub struct WirelessStatus {
     cellular: WwanNetworkStatus,
 }
 
-#[derive(Debug, Deserialize, Serialize, PartialEq, Clone)]
+#[derive(Debug, Deserialize, Serialize, PartialEq, Clone, Default)]
+#[serde(rename_all = "PascalCase", default)]
 pub struct ProxyEntry {
     #[serde(rename = "type")]
     pub proxy_type: NetworkProxyType,
@@ -517,16 +518,16 @@ pub enum WwanRAT {
     WwanRAT5GNR,
 }
 
-#[derive(Debug, Deserialize, Serialize, PartialEq, Clone)]
-#[serde(rename_all = "PascalCase")]
+#[derive(Debug, Deserialize, Serialize, PartialEq, Clone, Default)]
+#[serde(rename_all = "PascalCase", default)]
 pub struct CellNetPortConfig {
     pub access_points: Option<Vec<CellularAccessPoint>>,
     pub probe: WwanProbe,
     pub location_tracking: bool,
 }
 
-#[derive(Debug, Deserialize, Serialize, PartialEq, Clone)]
-#[serde(rename_all = "PascalCase")]
+#[derive(Debug, Deserialize, Serialize, PartialEq, Clone, Default)]
+#[serde(rename_all = "PascalCase", default)]
 pub struct WwanProbe {
     disable: bool,
     // IP/FQDN address to periodically probe to determine connection status.
@@ -534,15 +535,16 @@ pub struct WwanProbe {
 }
 
 #[repr(u8)]
-#[derive(Debug, Serialize_repr, Deserialize_repr, PartialEq, Clone)]
+#[derive(Debug, Serialize_repr, Deserialize_repr, PartialEq, Clone, Default)]
 pub enum ConnectivityProbeMethod {
+    #[default]
     ConnectivityProbeMethodNone = 0,
     ConnectivityProbeMethodICMP = 1,
     ConnectivityProbeMethodTCP = 2,
 }
 
-#[derive(Debug, Deserialize, Serialize, PartialEq, Clone)]
-#[serde(rename_all = "PascalCase")]
+#[derive(Debug, Deserialize, Serialize, PartialEq, Clone, Default)]
+#[serde(rename_all = "PascalCase", default)]
 pub struct ConnectivityProbe {
     // Method to use to determine the connectivity status.
     pub method: ConnectivityProbeMethod,
@@ -648,9 +650,10 @@ pub struct CellularAccessPoint {
 }
 
 #[repr(u8)]
-#[derive(Debug, Serialize_repr, Deserialize_repr, PartialEq, Clone)]
+#[derive(Debug, Serialize_repr, Deserialize_repr, PartialEq, Clone, Default)]
 pub enum L2LinkType {
     // L2LinkTypeNone : not an L2 link (used for physical network adapters).
+    #[default]
     L2LinkTypeNone = 0,
     // L2LinkTypeVLAN : VLAN sub-interface
     L2LinkTypeVLAN = 1,
@@ -658,8 +661,8 @@ pub enum L2LinkType {
     L2LinkTypeBond = 2,
 }
 
-#[derive(Debug, Deserialize, Serialize, PartialEq, Clone)]
-#[serde(rename_all = "PascalCase")]
+#[derive(Debug, Deserialize, Serialize, PartialEq, Clone, Default)]
+#[serde(rename_all = "PascalCase", default)]
 pub struct VLANConfig {
     parent_port: String,
     #[serde(rename = "ID")]
@@ -667,9 +670,10 @@ pub struct VLANConfig {
 }
 
 #[repr(u8)]
-#[derive(Debug, Serialize_repr, Deserialize_repr, PartialEq, Clone)]
+#[derive(Debug, Serialize_repr, Deserialize_repr, PartialEq, Clone, Default)]
 pub enum BondMode {
     // BondModeUnspecified : default is Round-Robin
+    #[default]
     BondModeUnspecified = 0,
     // BondModeBalanceRR : Round-Robin
     BondModeBalanceRR = 1,
@@ -687,8 +691,8 @@ pub enum BondMode {
     BondModeBalanceALB = 7,
 }
 
-#[derive(Debug, Deserialize, Serialize, PartialEq, Clone)]
-#[serde(rename_all = "PascalCase")]
+#[derive(Debug, Deserialize, Serialize, PartialEq, Clone, Default)]
+#[serde(rename_all = "PascalCase", default)]
 pub struct BondConfig {
     pub aggregated_ports: Option<Vec<String>>,
     pub mode: BondMode,
@@ -699,8 +703,8 @@ pub struct BondConfig {
     pub arp_monitor: BondArpMonitor,
 }
 
-#[derive(Debug, Deserialize, Serialize, PartialEq, Clone)]
-#[serde(rename_all = "PascalCase")]
+#[derive(Debug, Deserialize, Serialize, PartialEq, Clone, Default)]
+#[serde(rename_all = "PascalCase", default)]
 pub struct BondMIIMonitor {
     pub down_delay: u32,
     pub enabled: bool,
@@ -708,8 +712,8 @@ pub struct BondMIIMonitor {
     pub up_delay: u32,
 }
 
-#[derive(Debug, Deserialize, Serialize, PartialEq, Clone)]
-#[serde(rename_all = "PascalCase")]
+#[derive(Debug, Deserialize, Serialize, PartialEq, Clone, Default)]
+#[serde(rename_all = "PascalCase", default)]
 pub struct BondArpMonitor {
     pub enabled: bool,
     #[serde(rename = "IPTargets")]
@@ -718,8 +722,9 @@ pub struct BondArpMonitor {
 }
 
 #[repr(u8)]
-#[derive(Debug, Serialize_repr, Deserialize_repr, PartialEq, Clone)]
+#[derive(Debug, Serialize_repr, Deserialize_repr, PartialEq, Clone, Default)]
 pub enum LacpRate {
+    #[default]
     LacpRateUnspecified = 0,
     LacpRateSlow = 1,
     LacpRateFast = 2,
@@ -735,8 +740,9 @@ pub enum LacpRate {
 /// [Client] is the real DHCP client
 /// [Static] is the static IP address
 #[repr(u8)]
-#[derive(Debug, Serialize_repr, Deserialize_repr, PartialEq, Clone)]
+#[derive(Debug, Serialize_repr, Deserialize_repr, PartialEq, Clone, Default)]
 pub enum DhcpType {
+    #[default]
     NOOP = 0,
     Static = 1,
     None = 2,
@@ -747,8 +753,9 @@ pub enum DhcpType {
 
 // DPCState enum
 #[repr(u8)]
-#[derive(Debug, Serialize_repr, Deserialize_repr, PartialEq, Clone)]
+#[derive(Debug, Serialize_repr, Deserialize_repr, PartialEq, Clone, Default)]
 pub enum DPCState {
+    #[default]
     None = 0,
     Fail = 1,
     FailWithIPAndDNS = 2,
@@ -762,8 +769,9 @@ pub enum DPCState {
 
 // NetworkType enum
 #[repr(u8)]
-#[derive(Debug, Serialize_repr, Deserialize_repr, PartialEq, Clone)]
+#[derive(Debug, Serialize_repr, Deserialize_repr, PartialEq, Clone, Default)]
 pub enum NetworkType {
+    #[default]
     NOOP = 0,
     IPv4 = 4,
     IPV6 = 6,
@@ -774,28 +782,30 @@ pub enum NetworkType {
 
 // NetworkProxyType enum
 #[repr(u8)]
-#[derive(Debug, Serialize_repr, Deserialize_repr, PartialEq, Clone)]
+#[derive(Debug, Serialize_repr, Deserialize_repr, PartialEq, Clone, Default)]
 pub enum NetworkProxyType {
     HTTP = 0,
     HTTPS = 1,
     SOCKS = 2,
     FTP = 3,
+    #[default]
     NOPROXY = 4,
     LAST = 255,
 }
 
 // WirelessType enum
 #[repr(u8)]
-#[derive(Debug, Serialize_repr, Deserialize_repr, PartialEq, Clone)]
+#[derive(Debug, Serialize_repr, Deserialize_repr, PartialEq, Clone, Default)]
 pub enum WirelessType {
+    #[default]
     None = 0,
     Cellular = 1,
     Wifi = 2,
 }
 
 // WirelessConfig struct
-#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
-#[serde(rename_all = "PascalCase")]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone, Default)]
+#[serde(rename_all = "PascalCase", default)]
 pub struct WirelessConfig {
     #[serde(rename = "WType")]
     pub w_type: WirelessType,
@@ -809,8 +819,8 @@ pub struct WirelessConfig {
 pub type DevicePortConfigVersion = u32;
 
 // DevicePortConfig struct
-#[derive(Debug, Deserialize, Serialize, PartialEq, Clone)]
-#[serde(rename_all = "PascalCase")]
+#[derive(Debug, Deserialize, Serialize, PartialEq, Clone, Default)]
+#[serde(rename_all = "PascalCase", default)]
 pub struct DevicePortConfig {
     pub version: DevicePortConfigVersion,
     pub key: String,
@@ -861,8 +871,8 @@ impl DevicePortConfig {
 }
 
 // DevicePortConfigList struct
-#[derive(Debug, Deserialize, Serialize)]
-#[serde(rename_all = "PascalCase")]
+#[derive(Debug, Deserialize, Serialize, Default)]
+#[serde(rename_all = "PascalCase", default)]
 pub struct DevicePortConfigList {
     pub current_index: i32,
     pub port_config_list: Option<Vec<DevicePortConfig>>,
@@ -897,8 +907,8 @@ impl DevicePortConfigList {
 }
 
 // NetworkPortConfig struct
-#[derive(Debug, Deserialize, Serialize, PartialEq, Clone)]
-#[serde(rename_all = "PascalCase")]
+#[derive(Debug, Deserialize, Serialize, PartialEq, Clone, Default)]
+#[serde(rename_all = "PascalCase", default)]
 pub struct NetworkPortConfig {
     pub if_name: String,
     #[serde(rename = "USBAddr")]
@@ -1001,8 +1011,8 @@ impl NetworkPortConfig {
 
 // DhcpConfig struct
 #[serde_as]
-#[derive(Debug, Deserialize, Serialize, PartialEq, Clone)]
-#[serde(rename_all = "PascalCase")]
+#[derive(Debug, Deserialize, Serialize, PartialEq, Clone, Default)]
+#[serde(rename_all = "PascalCase", default)]
 pub struct DhcpConfig {
     pub dhcp: DhcpType,
     #[serde_as(as = "NoneAsEmptyString")]
