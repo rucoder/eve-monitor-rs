@@ -11,12 +11,13 @@ use crossterm::event::{KeyCode, KeyModifiers};
 use log::{debug, info};
 use ratatui::{
     layout::{
+        Alignment,
         Constraint::{Fill, Length},
         Layout,
     },
-    style::{Color, Modifier, Stylize},
+    style::{Color, Modifier, Style, Stylize},
     text::Line,
-    widgets::{Block, Clear, Paragraph, Tabs, Widget},
+    widgets::{Block, BorderType, Borders, Clear, Paragraph, Tabs, Widget},
 };
 use std::rc::Rc;
 use strum::{Display, EnumCount, EnumIter, FromRepr, IntoEnumIterator};
@@ -115,6 +116,7 @@ impl Ui {
         let screen_layout = Layout::vertical([Length(3), Fill(0), Length(3)]);
         let tabs_widget = Ui::tabs();
         let git_version = model.borrow().app_version.clone();
+        let ipc_connected = model.borrow().ipc_connected;
 
         //TODO: handle terminal event
         let _ = self.terminal.draw(|frame| {
@@ -157,7 +159,43 @@ impl Ui {
             // render status bar
             self.status_bar
                 .render(&statusbar_rect, frame, &model, false);
+
+            // render connection overlay on top of everything when disconnected
+            if !ipc_connected {
+                Self::render_connection_overlay(frame, &body_rect);
+            }
         });
+    }
+
+    /// Renders a centered overlay popup indicating that the IPC connection
+    /// to EVE is not established and the monitor is retrying.
+    fn render_connection_overlay(frame: &mut ratatui::Frame<'_>, area: &ratatui::layout::Rect) {
+        let popup_width: u16 = 50;
+        let popup_height: u16 = 7;
+        let popup_area = super::tools::centered_rect_fixed(popup_width, popup_height, *area);
+
+        // clear the area behind the popup
+        Clear.render(popup_area, frame.buffer_mut());
+
+        let block = Block::default()
+            .borders(Borders::ALL)
+            .border_type(BorderType::Double)
+            .border_style(Style::default().fg(Color::Yellow))
+            .style(Style::default().bg(Color::Black))
+            .title(" EVE Connection ");
+
+        let inner = block.inner(popup_area);
+        frame.render_widget(block, popup_area);
+
+        let text = vec![
+            Line::from(""),
+            Line::from("Connecting to EVE...").style(Style::default().fg(Color::Yellow)),
+            Line::from(""),
+            Line::from("Cannot connect, retrying...").style(Style::default().fg(Color::DarkGray)),
+        ];
+
+        let paragraph = Paragraph::new(text).alignment(Alignment::Center);
+        frame.render_widget(paragraph, inner);
     }
 
     fn invalidate(&mut self) {

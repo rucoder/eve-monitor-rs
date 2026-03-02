@@ -52,6 +52,9 @@ pub enum Request {
 pub enum IpcMessage {
     Connecting,
     Ready,
+    /// The IPC connection was lost (e.g. pillar crashed or socket closed).
+    /// The application should show a reconnecting popup and retry.
+    Disconnected,
     NetworkStatus(DeviceNetworkStatus),
     DPCList(DevicePortConfigList),
     DownloaderStatus(DownloaderStatus),

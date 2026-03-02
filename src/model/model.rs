@@ -102,6 +102,8 @@ pub struct MonitorModel {
     pub tpm: Option<TpmLogDiff>,
     pub error_log: Vec<String>,
     pub status_bar_tips: Option<String>,
+    /// Whether the IPC connection to EVE is currently established
+    pub ipc_connected: bool,
 }
 
 impl From<EveVaultStatus> for VaultStatus {
@@ -300,6 +302,7 @@ impl Default for MonitorModel {
             tpm: None,
             error_log: Vec::new(),
             status_bar_tips: None,
+            ipc_connected: false,
         }
     }
 }

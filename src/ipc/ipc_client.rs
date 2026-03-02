@@ -4,10 +4,14 @@
 use anyhow::{anyhow, Result};
 use async_inotify::Watcher;
 use inotify::EventMask;
-use log::{debug, info};
+use log::{debug, info, warn};
 use std::path::{Path, PathBuf};
+use std::time::Duration;
 use tokio::{net::UnixStream, task::JoinHandle};
 use tokio_util::codec::{Framed, LengthDelimitedCodec};
+
+/// Default timeout for establishing an IPC connection (socket appear + connect).
+const IPC_CONNECT_TIMEOUT: Duration = Duration::from_secs(30);
 
 pub struct IpcClient {}
 impl IpcClient {
@@ -18,17 +22,40 @@ impl IpcClient {
                     return Ok(unix_stream);
                 }
                 Err(e) => {
-                    info!(
+                    warn!(
                         "Failed to connect to socket: {}. Retrying {}/{}",
-                        e, attempts, i
+                        e,
+                        i + 1,
+                        attempts
                     );
-                    tokio::time::sleep(std::time::Duration::from_millis(100)).await;
+                    tokio::time::sleep(Duration::from_millis(100)).await;
                 }
             }
         }
-        Err(anyhow!("Failed to connect to socket"))
+        Err(anyhow!(
+            "Failed to connect to socket after {} attempts",
+            attempts
+        ))
     }
     pub async fn connect(path: &str) -> Result<Framed<UnixStream, LengthDelimitedCodec>> {
+        Self::connect_with_timeout(path, IPC_CONNECT_TIMEOUT).await
+    }
+
+    pub async fn connect_with_timeout(
+        path: &str,
+        timeout: Duration,
+    ) -> Result<Framed<UnixStream, LengthDelimitedCodec>> {
+        match tokio::time::timeout(timeout, Self::connect_inner(path)).await {
+            Ok(result) => result,
+            Err(_) => Err(anyhow!(
+                "Timed out after {:?} waiting for IPC connection at {}",
+                timeout,
+                path
+            )),
+        }
+    }
+
+    async fn connect_inner(path: &str) -> Result<Framed<UnixStream, LengthDelimitedCodec>> {
         //spawn a task to wait for the socket file to be created
         let socket_path = PathBuf::from(path);
 
