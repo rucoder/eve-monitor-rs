@@ -34,6 +34,7 @@ use super::{
     action::Action,
     app_page::ApplicationsPage,
     layer_stack::LayerStack,
+    message_box::create_system_message_box,
     networkpage::create_network_page,
     statusbar::{create_status_bar, StatusBarState},
     summary_page::SummaryPage,
@@ -55,6 +56,7 @@ pub struct Ui {
     pub selected_tab: UiTabs,
     pub status_bar: Window<StatusBarState>,
     first_frame: bool,
+    connection_popup_shown: bool,
 }
 
 #[derive(Default, Copy, Clone, Display, EnumIter, Debug, FromRepr, EnumCount)]
@@ -84,6 +86,7 @@ impl Ui {
             selected_tab: UiTabs::default(),
             status_bar: create_status_bar(),
             first_frame: true,
+            connection_popup_shown: false,
         })
     }
 
@@ -164,6 +167,35 @@ impl Ui {
         self.action_tx
             .send(Action::new("app", UiActions::Redraw))
             .unwrap();
+    }
+
+    /// Push a non-dismissable system message box onto every tab's layer stack
+    /// to indicate that the IPC connection to EVE is being established.
+    /// No-op if the popup is already shown.
+    pub fn show_connection_popup(&mut self) {
+        if self.connection_popup_shown {
+            return;
+        }
+        info!("Showing connection popup on all tabs");
+        for stack in self.views.iter_mut() {
+            let popup =
+                create_system_message_box(" EVE Connection ", "Connecting to EVE, retrying...");
+            stack.push(Box::new(popup));
+        }
+        self.connection_popup_shown = true;
+    }
+
+    /// Pop the connection popup from every tab's layer stack.
+    /// No-op if the popup is not currently shown.
+    pub fn dismiss_connection_popup(&mut self) {
+        if !self.connection_popup_shown {
+            return;
+        }
+        info!("Dismissing connection popup from all tabs");
+        for stack in self.views.iter_mut() {
+            stack.pop();
+        }
+        self.connection_popup_shown = false;
     }
 
     pub fn handle_event(&mut self, event: Event) -> Option<Action> {

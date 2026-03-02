@@ -123,3 +123,40 @@ pub fn create_message_box(window_caption: &str, content: &str) -> impl IWindow {
         .unwrap();
     w
 }
+
+/// Creates a system (non-dismissable) message box.
+/// It has no buttons and does not respond to Esc or any key events.
+/// It can only be removed programmatically via `pop_layer()`.
+pub fn create_system_message_box(window_caption: &str, content: &str) -> impl IWindow {
+    fn sys_on_init(w: &mut Window<MessageBoxState>) {
+        w.add_widget("label", LabelElement::new(w.state.content.clone()));
+    }
+
+    fn sys_do_layout(w: &mut Window<MessageBoxState>, rect: &Rect, _model: &Rc<Model>) {
+        let rect = crate::ui::tools::centered_rect_fixed(40, 7, *rect);
+        let content_area = rect.inner(Margin {
+            horizontal: 1,
+            vertical: 1,
+        });
+
+        w.update_layout("frame", rect);
+        w.update_layout("label", content_area);
+    }
+
+    // Swallow all key events — the popup cannot be dismissed by the user
+    fn sys_on_key_event(_w: &mut Window<MessageBoxState>, _key: KeyEvent) -> Option<Action> {
+        None
+    }
+
+    let w = Window::builder(window_caption)
+        .with_on_init(sys_on_init)
+        .with_layout(sys_do_layout)
+        .with_render(do_render)
+        .with_on_key_event(sys_on_key_event)
+        .with_state(MessageBoxState {
+            content: content.to_string(),
+        })
+        .build()
+        .unwrap();
+    w
+}
