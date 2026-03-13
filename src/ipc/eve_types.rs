@@ -325,7 +325,7 @@ pub struct L2LinkConfig {
 }
 
 #[derive(Debug, Deserialize, Serialize, PartialEq, Clone, Default)]
-#[serde(rename_all = "PascalCase")]
+#[serde(rename_all = "PascalCase", default)]
 pub struct TestResults {
     pub last_failed: DateTime<Utc>,
     pub last_succeeded: DateTime<Utc>,
@@ -386,8 +386,8 @@ pub struct IPInfo {
     pub postal: String,
 }
 
-#[derive(Debug, Deserialize, Serialize, PartialEq, Clone)]
-#[serde(rename_all = "PascalCase")]
+#[derive(Debug, Deserialize, Serialize, PartialEq, Clone, Default)]
+#[serde(rename_all = "PascalCase", default)]
 pub struct WifiConfig {
     #[serde(rename = "SSID")]
     pub ssid: String,
@@ -399,8 +399,8 @@ pub struct WifiConfig {
     pub cipher_block_status: CipherBlockStatus,
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
-#[serde(rename_all = "PascalCase")]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone, Default)]
+#[serde(rename_all = "PascalCase", default)]
 pub struct CipherBlockStatus {
     #[serde(rename = "CipherBlockID")]
     pub cipher_block_id: String,
@@ -416,14 +416,15 @@ pub struct CipherBlockStatus {
     pub error_and_time: ErrorAndTime,
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone, Default)]
 pub struct CipherContext {
     // Define fields here
 }
 
 #[repr(u8)]
-#[derive(Debug, Serialize_repr, Deserialize_repr, PartialEq, Clone)]
+#[derive(Debug, Serialize_repr, Deserialize_repr, PartialEq, Clone, Default)]
 pub enum WifiKeySchemeType {
+    #[default]
     KeySchemeNone = 0,
     KeySchemeWpaPsk = 1,
     KeySchemeWpaEap = 2,
@@ -440,8 +441,8 @@ pub struct DeprecatedCellConfig {
     pub location_tracking: bool,
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
-#[serde(rename_all = "PascalCase")]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone, Default)]
+#[serde(rename_all = "PascalCase", default)]
 pub struct WwanNetworkStatus {
     pub logical_label: String,
     pub phys_addrs: WwanPhysAddrs,
@@ -471,8 +472,8 @@ where
 }
 
 #[serde_as]
-#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
-#[serde(rename_all = "PascalCase")]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone, Default)]
+#[serde(rename_all = "PascalCase", default)]
 pub struct WwanIPSettings {
     #[serde_as(as = "Option<FromInto<GoIpNetwork>>")]
     pub address: Option<IpNet>,
@@ -484,33 +485,34 @@ pub struct WwanIPSettings {
     pub mtu: u16,
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
-#[serde(rename_all = "PascalCase")]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone, Default)]
+#[serde(rename_all = "PascalCase", default)]
 pub struct WwanPhysAddrs {
     // Define fields here
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
-#[serde(rename_all = "PascalCase")]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone, Default)]
+#[serde(rename_all = "PascalCase", default)]
 pub struct WwanCellModule {
     // Define fields here
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
-#[serde(rename_all = "PascalCase")]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone, Default)]
+#[serde(rename_all = "PascalCase", default)]
 pub struct WwanSimCard {
     // Define fields here
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
-#[serde(rename_all = "PascalCase")]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone, Default)]
+#[serde(rename_all = "PascalCase", default)]
 pub struct WwanProvider {
     // Define fields here
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone, Default)]
 #[serde(rename_all = "PascalCase")]
 pub enum WwanRAT {
+    #[default]
     WwanRATUnspecified,
     WwanRATGSM,
     WwanRATUMTS,
@@ -1027,8 +1029,8 @@ pub struct DhcpConfig {
     pub dhcp_type: NetworkType,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
-#[serde(rename_all = "PascalCase")]
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
+#[serde(rename_all = "PascalCase", default)]
 pub struct DownloaderStatus {
     pub image_sha256: String,
     #[serde(rename = "DatastoreIDList")]
@@ -1054,8 +1056,8 @@ pub struct DownloaderStatus {
     pub orig_error: String,
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
-#[serde(rename_all = "PascalCase")]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone, Default)]
+#[serde(rename_all = "PascalCase", default)]
 pub struct ErrorAndTime {
     #[serde(flatten)]
     pub error_description: ErrorDescription,
@@ -1067,8 +1069,8 @@ impl ErrorAndTime {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
-#[serde(rename_all = "PascalCase")]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone, Default)]
+#[serde(rename_all = "PascalCase", default)]
 pub struct ErrorDescription {
     pub error: String,
     pub error_time: DateTime<Utc>,
@@ -1078,16 +1080,17 @@ pub struct ErrorDescription {
 }
 
 #[repr(i32)]
-#[derive(Serialize_repr, Deserialize_repr, PartialEq, Debug, Clone)]
+#[derive(Serialize_repr, Deserialize_repr, PartialEq, Debug, Clone, Default)]
 pub enum ErrorSeverity {
+    #[default]
     Unspecified = 0,
     Notice = 1,
     Warning = 2,
     Error = 3,
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
-#[serde(rename_all = "PascalCase")]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone, Default)]
+#[serde(rename_all = "PascalCase", default)]
 pub struct ErrorEntity {
     pub entity_type: ErrorEntityType,
     #[serde(rename = "EntityID")]
@@ -1095,8 +1098,9 @@ pub struct ErrorEntity {
 }
 
 #[repr(i32)]
-#[derive(Serialize_repr, Deserialize_repr, PartialEq, Debug, Clone)]
+#[derive(Serialize_repr, Deserialize_repr, PartialEq, Debug, Clone, Default)]
 pub enum ErrorEntityType {
+    #[default]
     Unspecified = 0,
     BaseOs = 1,
     SystemAdapter = 2,
@@ -1203,8 +1207,8 @@ pub struct EthVF {
 }
 
 // application related types
-#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
-#[serde(rename_all = "PascalCase")]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone, Default)]
+#[serde(rename_all = "PascalCase", default)]
 pub struct AppInstanceStatus {
     #[serde(rename = "UUIDandVersion")]
     pub uuid_and_version: UUIDandVersion,
@@ -1235,8 +1239,9 @@ pub struct AppInstanceStatus {
 }
 
 #[repr(u8)]
-#[derive(Serialize_repr, Deserialize_repr, PartialEq, Debug, Clone, Copy, Display)]
+#[derive(Serialize_repr, Deserialize_repr, PartialEq, Debug, Clone, Copy, Display, Default)]
 pub enum SwState {
+    #[default]
     Initial = 100,
     ResolvingTag = 101,
     ResolvedTag = 102,
@@ -1270,16 +1275,16 @@ impl SwState {
         format!("{}", self)
     }
 }
-#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
-#[serde(rename_all = "PascalCase")]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone, Default)]
+#[serde(rename_all = "PascalCase", default)]
 pub struct UUIDandVersion {
     #[serde(rename = "UUID")]
     pub uuid: Uuid,
     pub version: String,
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
-#[serde(rename_all = "PascalCase")]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone, Default)]
+#[serde(rename_all = "PascalCase", default)]
 pub struct VmConfig {
     pub kernel: String,
     pub ramdisk: String,
@@ -1312,8 +1317,9 @@ pub struct VmConfig {
 }
 
 #[repr(u8)]
-#[derive(Debug, Serialize_repr, Deserialize_repr, PartialEq, Clone)]
+#[derive(Debug, Serialize_repr, Deserialize_repr, PartialEq, Clone, Default)]
 pub enum VmMode {
+    #[default]
     PV = 0,
     HVM = 1,
     Filler = 2,
@@ -1322,8 +1328,8 @@ pub enum VmMode {
     Legacy = 5,
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
-#[serde(rename_all = "PascalCase")]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone, Default)]
+#[serde(rename_all = "PascalCase", default)]
 pub struct VolumeRefStatus {
     #[serde(rename = "VolumeID")]
     pub volume_id: Uuid,
@@ -1349,8 +1355,9 @@ pub struct VolumeRefStatus {
 }
 
 #[repr(i32)]
-#[derive(Debug, Serialize_repr, Deserialize_repr, PartialEq, Clone)]
+#[derive(Debug, Serialize_repr, Deserialize_repr, PartialEq, Clone, Default)]
 pub enum Format {
+    #[default]
     FmtUnknown = 0,
     RAW = 1,
     QCOW = 2,
@@ -1365,8 +1372,9 @@ pub enum Format {
 }
 
 #[repr(i32)]
-#[derive(Debug, Serialize_repr, Deserialize_repr, PartialEq, Clone)]
+#[derive(Debug, Serialize_repr, Deserialize_repr, PartialEq, Clone, Default)]
 pub enum Target {
+    #[default]
     TgtUnknown = 0,
     Disk = 1,
     Kernel = 2,
@@ -1375,8 +1383,8 @@ pub enum Target {
     AppCustom = 5,
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
-#[serde(rename_all = "PascalCase")]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone, Default)]
+#[serde(rename_all = "PascalCase", default)]
 pub struct ErrorAndTimeWithSource {
     pub error_source_type: String,
     #[serde(flatten)]
@@ -1384,8 +1392,9 @@ pub struct ErrorAndTimeWithSource {
 }
 
 #[repr(u8)]
-#[derive(Debug, Serialize_repr, Deserialize_repr, PartialEq, Clone)]
+#[derive(Debug, Serialize_repr, Deserialize_repr, PartialEq, Clone, Default)]
 pub enum Inprogress {
+    #[default]
     NotInprogress = 0,
     DownloadAndVerify = 1,
     BringDown = 2,
@@ -1403,16 +1412,16 @@ pub struct IoAdapter {} // Replace with actual definition
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone, Default)]
 pub struct SnapshottingStatus {} // Replace with actual definition
 
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(rename_all = "PascalCase")]
+#[derive(Debug, Serialize, Deserialize, Default)]
+#[serde(rename_all = "PascalCase", default)]
 pub struct EveOnboardingStatus {
     #[serde(rename = "DeviceUUID")]
     pub device_uuid: Uuid,
     pub hardware_model: String, // From controller
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(rename_all = "PascalCase")]
+#[derive(Debug, Serialize, Deserialize, Default)]
+#[serde(rename_all = "PascalCase", default)]
 pub struct EveVaultStatus {
     pub name: String,
     pub status: DataSecAtRestStatus,
@@ -1426,8 +1435,9 @@ pub struct EveVaultStatus {
 }
 
 #[repr(i32)]
-#[derive(Debug, Serialize_repr, Deserialize_repr, PartialEq, Clone)]
+#[derive(Debug, Serialize_repr, Deserialize_repr, PartialEq, Clone, Default)]
 pub enum DataSecAtRestStatus {
+    #[default]
     DataSecAtRestUnknown = 0,  // Status is unknown
     DataSecAtRestDisabled = 1, // Enabled, but not being used
     DataSecAtRestEnabled = 2,  // Enabled, and used
@@ -1435,8 +1445,9 @@ pub enum DataSecAtRestStatus {
 }
 
 #[repr(i32)]
-#[derive(Debug, Serialize_repr, Deserialize_repr, PartialEq, Clone)]
+#[derive(Debug, Serialize_repr, Deserialize_repr, PartialEq, Clone, Default)]
 pub enum PCRStatus {
+    #[default]
     PcrUnknown = 0,  // Status is unknown
     PcrEnabled = 1,  // Enabled PCR
     PcrDisabled = 2, // Disabled PCR
@@ -1445,7 +1456,7 @@ pub enum PCRStatus {
 type AppCount = u8;
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
-#[serde(rename_all = "PascalCase")]
+#[serde(rename_all = "PascalCase", default)]
 pub struct AppInstanceSummary {
     //#[serde(rename = "UUIDandVersion")]
     //pub uuid_and_version: UUIDandVersion,
@@ -1455,15 +1466,16 @@ pub struct AppInstanceSummary {
     pub total_error: AppCount,    // Total number of apps in error state
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "PascalCase")]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[serde(rename_all = "PascalCase", default)]
 pub struct LedBlinkCounter {
     pub blink_counter: LedBlinkCount,
 }
 
 #[repr(u8)]
-#[derive(Debug, Serialize_repr, Deserialize_repr, PartialEq, Clone)]
+#[derive(Debug, Serialize_repr, Deserialize_repr, PartialEq, Clone, Default)]
 pub enum LedBlinkCount {
+    #[default]
     LedBlinkUndefined = 0,
     LedBlinkWaitingForIP,
     LedBlinkConnectingToController,
@@ -1481,6 +1493,7 @@ pub enum LedBlinkCount {
 }
 
 #[derive(Debug, Default, Serialize, Deserialize)]
+#[serde(default)]
 pub struct EveNodeStatus {
     pub server: Option<String>,
     #[serde(deserialize_with = "zero_uuid_as_none")]
@@ -1501,13 +1514,14 @@ where
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Default)]
+#[serde(default)]
 pub struct AppsList {
     pub apps: Vec<AppInstanceStatus>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(rename_all = "PascalCase")]
+#[derive(Debug, Serialize, Deserialize, Default)]
+#[serde(rename_all = "PascalCase", default)]
 pub struct ZedAgentStatus {
     pub name: String,
     pub config_get_status: ConfigGetStatus,
@@ -1529,9 +1543,10 @@ pub struct ZedAgentStatus {
     pub vault_err: String,
 }
 
-#[derive(Debug, Serialize_repr, Deserialize_repr)]
+#[derive(Debug, Serialize_repr, Deserialize_repr, Default)]
 #[repr(u8)]
 pub enum BootReason {
+    #[default]
     BootReasonNone = 0,
     BootReasonFirst = 1,         // Normal - was not yet onboarded
     BootReasonRebootCmd = 2,     // Normal - result of a reboot command in the API
@@ -1550,9 +1565,10 @@ pub enum BootReason {
     BootReasonParseFail = 255, // BootReasonFromString didn't find match
 }
 
-#[derive(Debug, Serialize_repr, Deserialize_repr)]
+#[derive(Debug, Serialize_repr, Deserialize_repr, Default)]
 #[repr(i32)]
 pub enum AttestState {
+    #[default]
     StateNone = 0,           // State when (Re)Starting attestation
     StateNonceWait,          // Waiting for response from Controller for Nonce request
     StateInternalQuoteWait,  // Waiting for internal PCR quote to be published
@@ -1564,9 +1580,10 @@ pub enum AttestState {
     StateAny,                // Not a real state per se. helps defining wildcard transitions(below)
 }
 
-#[derive(Debug, Serialize_repr, Deserialize_repr)]
+#[derive(Debug, Serialize_repr, Deserialize_repr, Default)]
 #[repr(u8)]
 pub enum DeviceState {
+    #[default]
     Unspecified = 0,       // DEVICE_STATE_UNSPECIFIED
     Online = 1,            // DEVICE_STATE_ONLINE
     Rebooting = 2,         // DEVICE_STATE_REBOOTING
@@ -1578,9 +1595,10 @@ pub enum DeviceState {
     PreparedPowerOff = 8,  // DEVICE_STATE_PREPARED_POWEROFF
 }
 
-#[derive(Debug, Serialize_repr, Deserialize_repr)]
+#[derive(Debug, Serialize_repr, Deserialize_repr, Default)]
 #[repr(u8)]
 pub enum ConfigGetStatus {
+    #[default]
     Success = 1,       // ConfigGetSuccess
     Fail = 2,          // ConfigGetFail
     TemporaryFail = 3, // ConfigGetTemporaryFail
