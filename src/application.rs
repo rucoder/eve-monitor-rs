@@ -132,6 +132,13 @@ impl Application {
     where
         F: Fn(&mut Application) -> () + 'static,
     {
+        if !self.model.borrow().ipc_connected {
+            warn!(
+                "Attempted to send IPC message while disconnected: {:?}",
+                msg
+            );
+            return;
+        }
         if let Some(ipc_tx) = &self.ipc_tx {
             match &msg {
                 IpcMessage::Request { request, id } => {
@@ -169,6 +176,30 @@ impl Application {
 
     pub fn handle_ipc_message(&mut self, msg: IpcMessage) {
         match msg {
+            IpcMessage::Connecting => {
+                info!("IPC: Connecting...");
+                self.model.borrow_mut().ipc_connected = false;
+            }
+            IpcMessage::Ready => {
+                info!("IPC: Connection established");
+                self.model.borrow_mut().ipc_connected = true;
+                self.ui.dismiss_connection_popup();
+            }
+            IpcMessage::ConnectionFailed => {
+                warn!("IPC: Connection failed (initial)");
+                self.model.borrow_mut().ipc_connected = false;
+                self.ui
+                    .show_connection_popup("Connection to EVE took too long, retrying...");
+            }
+            IpcMessage::ConnectionLost => {
+                warn!("IPC: Connection lost");
+                self.model.borrow_mut().ipc_connected = false;
+                // Clear pending requests — they will never get a response
+                self.pending_requests.clear();
+                self.ui.show_connection_popup(
+                    "Connection to EVE lost.\nThe system is restarting or experiencing a temporary disruption.",
+                );
+            }
             IpcMessage::Response { result, id } => {
                 debug!("Got response: {:?}", result);
                 match result {
@@ -270,6 +301,7 @@ impl Application {
                 self.model.borrow_mut().update_tpm_logs(logs);
             }
 
+            #[allow(unreachable_patterns)]
             _ => {
                 warn!("Unhandled IPC message: {:?}", msg);
             }
@@ -454,49 +486,109 @@ impl Application {
         self.ipc_tx = Some(ipc_cmd_tx);
 
         let ipc_task = tokio::spawn(async move {
-            ipc_tx.send(IpcMessage::Connecting).unwrap();
-
             let socket_path = Application::get_socket_path();
+            let mut has_connected = false;
 
-            info!("Connecting to IPC socket {} ", &socket_path);
-            let stream = IpcClient::connect(&socket_path).await.unwrap();
-            let (mut sink, mut stream) = stream.split();
+            loop {
+                if ipc_cancel_token_clone.is_cancelled() {
+                    info!("IPC task was cancelled before connect attempt");
+                    return;
+                }
 
-            ipc_tx.send(IpcMessage::Ready).unwrap();
+                ipc_tx.send(IpcMessage::Connecting).unwrap();
+                info!("Connecting to IPC socket {} ", &socket_path);
 
-            while !ipc_cancel_token_clone.is_cancelled() {
-                let ipc_event = stream.next().fuse();
+                let stream = match IpcClient::connect(&socket_path).await {
+                    Ok(stream) => stream,
+                    Err(e) => {
+                        warn!("Failed to connect to IPC socket: {}", e);
+                        ipc_tx
+                            .send(if has_connected {
+                                IpcMessage::ConnectionLost
+                            } else {
+                                IpcMessage::ConnectionFailed
+                            })
+                            .unwrap();
+                        // Wait before retrying, but respect cancellation
+                        tokio::select! {
+                            _ = ipc_cancel_token_clone.cancelled() => {
+                                info!("IPC task was cancelled while waiting to retry");
+                                return;
+                            }
+                            _ = tokio::time::sleep(std::time::Duration::from_secs(2)) => {}
+                        }
+                        continue;
+                    }
+                };
 
-                tokio::select! {
-                    _ = ipc_cancel_token_clone.cancelled() => {
+                let (mut sink, mut stream) = stream.split();
+                info!("IPC connection established");
+                has_connected = true;
+                ipc_tx.send(IpcMessage::Ready).unwrap();
+
+                // Drain any stale commands that were queued while disconnected
+                while ipc_cmd_rx.try_recv().is_ok() {}
+
+                let disconnected = loop {
+                    if ipc_cancel_token_clone.is_cancelled() {
                         info!("IPC task was cancelled");
                         return;
                     }
-                    msg = ipc_cmd_rx.recv() => {
-                        match msg {
-                            Some(msg) => {
-                                sink.send(msg.into()).await.unwrap();
-                            }
-                            None => {
-                                warn!("IPC message stream ended");
-                                break;
-                            }
+
+                    let ipc_event = stream.next().fuse();
+
+                    tokio::select! {
+                        _ = ipc_cancel_token_clone.cancelled() => {
+                            info!("IPC task was cancelled");
+                            return;
                         }
-                    },
-                    msg = ipc_event => {
-                        match msg {
-                            Some(Ok(msg)) => {
-                                ipc_tx.send(IpcMessage::from(msg)).unwrap();
+                        msg = ipc_cmd_rx.recv() => {
+                            match msg {
+                                Some(msg) => {
+                                    if let Err(e) = sink.send(msg.into()).await {
+                                        warn!("Error sending IPC message: {:?}", e);
+                                        break true;
+                                    }
+                                }
+                                None => {
+                                    warn!("IPC command channel closed");
+                                    break false;
+                                }
                             }
-                            Some(Err(e)) => {
-                                warn!("Error reading IPC message: {:?}", e);
-                            }
-                            None => {
-                                warn!("IPC message stream ended");
-                                break;
+                        },
+                        msg = ipc_event => {
+                            match msg {
+                                Some(Ok(msg)) => {
+                                    ipc_tx.send(IpcMessage::from(msg)).unwrap();
+                                }
+                                Some(Err(e)) => {
+                                    warn!("Error reading IPC message: {:?}", e);
+                                    break true;
+                                }
+                                None => {
+                                    warn!("IPC message stream ended (server closed connection)");
+                                    break true;
+                                }
                             }
                         }
                     }
+                };
+
+                if disconnected {
+                    warn!("IPC connection lost, will retry...");
+                    ipc_tx.send(IpcMessage::ConnectionLost).unwrap();
+                    // Brief pause before reconnecting
+                    tokio::select! {
+                        _ = ipc_cancel_token_clone.cancelled() => {
+                            info!("IPC task was cancelled while waiting to reconnect");
+                            return;
+                        }
+                        _ = tokio::time::sleep(std::time::Duration::from_secs(2)) => {}
+                    }
+                    // Loop back to reconnect
+                } else {
+                    // Command channel closed — application is shutting down
+                    return;
                 }
             }
         });
@@ -616,8 +708,10 @@ impl Application {
                             self.handle_ipc_message(msg);
                         }
                         None => {
-                            warn!("IPC message stream ended");
-                            break;
+                            // The IPC task manages reconnection internally.
+                            // If the channel is closed, it means the task has exited
+                            // (e.g. due to cancellation). Don't break the main loop.
+                            warn!("IPC message channel closed");
                         }
                     }
                 }

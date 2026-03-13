@@ -52,6 +52,11 @@ pub enum Request {
 pub enum IpcMessage {
     Connecting,
     Ready,
+    /// The initial IPC connection could not be established (e.g. socket not ready).
+    ConnectionFailed,
+    /// A previously established IPC connection was lost
+    /// (e.g. pillar crashed or socket closed).
+    ConnectionLost,
     NetworkStatus(DeviceNetworkStatus),
     DPCList(DevicePortConfigList),
     DownloaderStatus(DownloaderStatus),
